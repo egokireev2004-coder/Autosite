@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Поиск запчасти</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 900px; margin: 40px auto; padding: 0 20px; }
+        h1   { font-size: 1.5rem; margin-bottom: 1.5rem; }
+
+        .search-form { display: flex; gap: 10px; margin-bottom: 2rem; }
+        .search-form input  { padding: 8px 12px; font-size: 1rem; border: 1px solid #ccc; border-radius: 6px; flex: 1; }
+        .search-form button { padding: 8px 20px; font-size: 1rem; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; }
+        .search-form button:hover { background: #1d4ed8; }
+
+        .error { color: darkred; font-weight: bold; margin-bottom: 1rem; }
+
+        .section-title { font-size: 1rem; font-weight: bold; color: #555; margin: 1.5rem 0 0.75rem; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
+
+        .cards { display: flex; flex-wrap: wrap; gap: 16px; }
+
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 16px;
+            width: 260px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.07);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .card .part-number { font-size: 1.1rem; font-weight: bold; color: #1e293b; }
+        .card .cross-label { font-size: 0.78rem; color: #888; }
+        .card .title       { font-size: 0.9rem; color: #444; }
+        .card .price       { font-size: 1rem; font-weight: bold; color: #1e293b; margin-top: 4px; }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            width: fit-content;
+        }
+        .badge-stock   { background: #dcfce7; color: #166534; }
+        .badge-order   { background: #fef9c3; color: #854d0e; }
+        .badge-missing { background: #fee2e2; color: #991b1b; }
+
+        .no-results { color: #666; font-style: italic; margin-top: 1rem; }
+    </style>
+</head>
+<body>
+
+<h1>Поиск по номеру запчасти</h1>
+
+<form method="post" th:action="@{/search}" class="search-form">
+    <input type="text" name="partNumber" th:value="${partNumber}"
+           placeholder="Введите номер запчасти" autofocus>
+    <button type="submit">Найти</button>
+</form>
+
+<div th:if="${error}" class="error" th:text="${error}"></div>
+
+<div th:if="${searched}">
+
+    
+    <div th:with="direct=${results.?[crossNumber == null]}">
+        <div class="section-title">Прямые совпадения</div>
+        <div th:if="${direct.isEmpty()}" class="no-results">Ничего не найдено</div>
+        <div class="cards">
+            <div class="card" th:each="r : ${direct}">
+                <div class="part-number" th:text="'Номер '+${r.partNumber}"></div>
+                <div class="title" th:if="${!r.title.isEmpty()}" th:text="'Название ' + ${r.title}"></div>
+                <div class="brand" th:if="${!r.brand.isEmpty()}" th:text="'Бренд ' +${r.brand}"></div>
+                <div class="price" th:if="${!r.price.isEmpty()}" th:text="'Цена: ' + ${r.price} + ' ₽'"></div>
+
+                <span th:if="${r.inStock}"    class="badge badge-stock">В наличии</span>
+                <span th:if="${!r.inStock and r.orderable}"  class="badge badge-order">Под заказ</span>
+                <span th:if="${!r.inStock and !r.orderable}" class="badge badge-missing">Нет в наличии</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- По кросс-номерам -->
+    <div th:with="crossed=${results.?[crossNumber != null]}">
+        <div class="section-title" th:if="${!crossed.isEmpty()}">Найдено по кросс-номерам</div>
+        <div class="cards">
+            <div class="card" th:each="r : ${crossed}">
+                <div class="part-number" th:text="'Номер'+${r.partNumber}"></div>
+                <div class="cross-label" th:text="'кросс: ' + ${r.crossNumber}"></div>
+                <div class="title" th:if="${!r.title.isEmpty()}" th:text="'Название '+${r.title}"></div>
+                <div class="brand" th:if="${!r.brand.isEmpty()}" th:text="'Бренд ' + ${r.brand}"></div>
+                <div class="price" th:if="${!r.price.isEmpty()}" th:text="'Цена: ' + ${r.price} + ' ₽'"></div>
+
+                <span th:if="${r.inStock}"    class="badge badge-stock">В наличии</span>
+                <span th:if="${!r.inStock and r.orderable}"  class="badge badge-order">Под заказ</span>
+                <span th:if="${!r.inStock and !r.orderable}" class="badge badge-missing">Нет в наличии</span>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
