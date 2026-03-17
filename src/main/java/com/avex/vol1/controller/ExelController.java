@@ -21,14 +21,14 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
 import com.avex.vol1.model.PartResult;
-import com.avex.vol1.service.ExelService;
+import com.avex.vol1.service.SearchService;
 import org.apache.poi.util.IOUtils;
 @Controller
 public class ExelController {
 
-    private final ExelService exelService;
+    private final SearchService exelService;
 
-    public ExelController(ExelService exelService) {
+    public ExelController(SearchService exelService) {
         this.exelService = exelService;
     }
 
